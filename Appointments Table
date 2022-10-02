@@ -1,0 +1,68 @@
+<apex:page docType="html-5.0" controller="HealthCenterController" showHeader="false" sidebar="false">
+    <apex:pageMessages showDetail="false"/>
+<apex:form >    
+    <apex:pageBlock title="Appointments Table">
+    
+    <apex:pageBlock id="Doctor">
+        <apex:actionFunction action="{!getDoctors}" name="selectDoctors" rerender="DoctorsWorkHours"/>
+        <apex:actionFunction action="{!getAppointments}" name="selectDoctorAppointments" rerender="AppointmentTable"/>
+        
+        Select a doctor 
+        <apex:selectList size="1" value="{!doctorId}" onclick="selectDoctors();" onchange="selectDoctorAppointments();">
+            <apex:selectOptions value="{!doctorsSelectOptionItems}"/>
+        </apex:selectList>
+        
+       <apex:dataList value="{!docHoursList}" var="docHours" id="DoctorsWorkHours">
+            Working Hours Start &nbsp;<apex:outputField value="{!docHours.Working_Hours_Start__c}"/><br/>
+            Working Hours End &nbsp;<apex:outputField value="{!docHours.Working_Hours_End__c}"/>
+        </apex:dataList>        
+        
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton action="{! goToAddNewDoctor }" value="Add New Doctor"/>
+        </apex:pageBlockButtons> 
+        
+    </apex:pageBlock>
+    
+    <apex:pageBlock id="Patient"> 
+        
+        Select a patient 
+        <apex:selectList size="1" value="{!patientId}">
+            <apex:selectOptions value="{!patientSelectOptionItems}"/>
+        </apex:selectList>
+        
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton action="{! goToAddNewPatient }" value="Add New Patient"/>
+        </apex:pageBlockButtons> 
+    </apex:pageBlock>   
+    
+    <apex:pageBlock id="Appointment"> 
+      
+            <apex:pageBlockSection columns="1">
+                <apex:inputField value="{! appointmentObject.Appointment_Date__c }" required="false"/>
+                <apex:inputField value="{! appointmentObject.Duration__c }" required="false"/>
+                <apex:commandButton action="{!saveAppointment}" value="Add New Appointment"/>
+                <apex:commandButton action="{!reset}" value="Reset ERROR" />
+            </apex:pageBlockSection> 
+          
+        <apex:pageBlockSection columns="1" id="AppointmentTable">
+            <apex:pageBlockTable value="{!appointmentList}" var="app">
+                <apex:column headerValue="Action">
+                    <apex:outputLink title="" value="/lightning/r/Appointment__c/{!app}/view" style="font-weight:bold" target="nextwindow">View</apex:outputLink>
+                </apex:column>
+                <apex:column value="{!app.Doctor__r.Name}"/>
+                <apex:column value="{!app.Patient__r.Name}"/>
+                <apex:column value="{!app.Appointment_Date__c}"/>
+                <apex:column value="{!app.Duration__c}"/>
+            </apex:pageBlockTable>
+            
+            {!Controller.pageNumber} of {! ROUND(controller.resultsize / 5, 0)}
+            
+        </apex:pageBlockSection>        
+        <apex:pageBlockButtons location="bottom">
+            <apex:commandButton value="Previous" action="{!controller.previous}" rendered="{!controller.hasPrevious}" />
+            <apex:commandButton value="Next" action="{!controller.next}" rendered="{!controller.hasNext}" />
+        </apex:pageBlockButtons>
+    </apex:pageBlock>
+ </apex:pageBlock>
+  </apex:form>    
+</apex:page>

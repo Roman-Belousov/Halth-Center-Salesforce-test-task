@@ -1,0 +1,18 @@
+@IsTest
+public class HealthCenterControllerTest {   
+@IsTest
+     static void  testController() {
+         Test.startTest();
+          DateTime str = DateTime.now();
+         Time time1 = Time.newInstance(10, 30, 30, 250);
+         HealthCenterController pageController = new HealthCenterController();
+         Appointment__c app1 = new Appointment__c(Doctor__c ='a005j000007CG5PAAW', Patient__c ='a015j000008OBGLAA4',Appointment_Date__c = str,Duration__c =15);
+         insert app1; 
+         Patient__c patients= new Patient__c(Name = 'Mr.Smith');
+         insert patients;
+         Doctor__c doctors= new Doctor__c(Name = 'Mr.Smith', Working_Hours_Start__c = time1, Working_Hours_End__c = time1);
+         insert doctors;
+         Test.stopTest(); 
+         
+    }      
+}

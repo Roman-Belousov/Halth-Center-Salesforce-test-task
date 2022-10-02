@@ -1,0 +1,86 @@
+public class HealthCenterController {
+    
+@TestVisible
+public List<Doctor__c> listOfDoctors {get;set;}
+public String doctorId {get;set;}
+public List<Doctor__c> docHoursList {get;set;}
+public List<Patient__c> patientList {get;set;}
+public String patientId {get;set;}
+public Apexpages.StandardSetController controller {get;set;}
+public List<Appointment__c> appointmentList {get;set;}
+public Appointment__c appointmentObject {get;set;}
+
+public HealthCenterController() {
+    listOfDoctors = [SELECT Id, Name From Doctor__c ORDER BY Name];
+    doctorId = listOfDoctors.isEmpty() == FALSE ? listOfDoctors[0].Id : NULL;
+    getDoctors();
+    
+    patientList = [SELECT Id, Name FROM Patient__c ];
+
+    getAppointments();
+    appointmentObject = new Appointment__c();
+}
+    
+    //Doctor 
+
+public List<SelectOption> getDoctorsSelectOptionItems() {
+    List<SelectOption> options = new List<SelectOption>();
+     for(Doctor__c d: listOfDoctors) {
+        options.add(new SelectOption(d.Id, d.Name));
+    }
+    return options;
+}
+
+public void getDoctors() {
+    docHoursList = [
+        SELECT Id, Name, Working_Hours_Start__c, Working_Hours_End__c  From Doctor__c
+        Where Id =: doctorId];
+}
+
+public PageReference goToAddNewDoctor() {
+    return new PageReference('https://cunning-koala-64u2ei-dev-ed.lightning.force.com/lightning/o/Doctor__c/new?count=1&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=164232528197771325&backgroundContext=%2Flightning%2Fo%2FDoctor__c%2Flist%3FfilterName%3DRecent');
+}
+
+     //Patient  
+
+public List<SelectOption> getPatientSelectOptionItems() {
+    List<SelectOption> options = new List<SelectOption>();
+     for(Patient__c p: patientList) {
+        options.add(new SelectOption(p.Id, p.Name));
+    }
+    return options;
+}
+
+    public PageReference goToAddNewPatient() {
+    return new PageReference('https://cunning-koala-64u2ei-dev-ed.lightning.force.com/lightning/o/Patient__c/new?count=3&nooverride=1&useRecordTypeCheck=1&navigationLocation=LIST_VIEW&uid=164232790518674078&backgroundContext=%2Flightning%2Fo%2FPatient__c%2Flist%3FfilterName%3DRecent');
+}
+
+      //Appointment
+    
+            public void getAppointments() {
+            List<Appointment__c> appList = [SELECT Id, Doctor__r.Name, Patient__r.Name, Appointment_Date__c, Duration__c
+                                                    FROM Appointment__c
+                                                    WHERE Doctor__r.Id =: doctorId];
+            controller = new Apexpages.StandardSetController(appList);
+            controller.setPageSize(20);
+            appointmentList =  (List<Appointment__c>)controller.getRecords();
+}
+
+public void saveAppointment() {
+    try{
+    appointmentObject.Doctor__c = doctorId;
+    appointmentObject.Patient__c = patientId;   
+    insert appointmentObject;
+    
+    }catch(DmlException e){
+       Apexpages.addMessage(new ApexPages.Message(ApexPages.SEVERITY.INFO, 'New appointment not created'));
+    }
+   appointmentObject = new Appointment__c();
+}
+       
+   public PageReference reset() {      
+        PageReference pg = new PageReference(System.currentPageReference().getURL());
+        pg.setRedirect(true);
+        return pg;
+    } 
+}
